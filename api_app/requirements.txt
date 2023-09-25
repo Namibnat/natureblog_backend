@@ -1,0 +1,5 @@
+fastapi~=0.103.1
+psycopg2-binary
+uvicorn
+SQLAlchemy~=2.0.21
+python-decouple
