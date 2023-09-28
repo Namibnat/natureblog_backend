@@ -3,3 +3,4 @@ psycopg2-binary
 uvicorn
 SQLAlchemy~=2.0.21
 python-decouple
+python-slugify==8.0.1
