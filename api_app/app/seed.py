@@ -1,3 +1,5 @@
+
+import datetime
 from sqlalchemy.orm import sessionmaker
 from model import BlogPost, engine  # adjust the import to your project structure
 
@@ -7,13 +9,12 @@ db = SessionLocal()
 
 
 def seed_db():
-    # Create two blog posts
-    post1 = BlogPost(title='My First Blog Post', body='This is the content of my first blog post.')
-    post2 = BlogPost(title='My Second Blog Post', body='This is the content of my second blog post.')
-
-    # Add the posts to the session
-    db.add(post1)
-    db.add(post2)
+    for index, post in enumerate(['First', 'Second', 'Third', 'Forth']):
+        text = f"My {post} Blog Post"
+        post = BlogPost(id=index, title=text, slug=text.lower().replace(' ', '_'),
+                        body=f"{text} blog content", date_created=datetime.datetime.now(),
+                        date_updated=datetime.datetime.now())
+        db.add(post)
 
     # Commit the session to save the objects to the database
     db.commit()
