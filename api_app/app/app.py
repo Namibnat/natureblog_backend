@@ -58,7 +58,7 @@ async def home():
     return {'title': 'Nature Blog', 'content': 'This is the blog of Vernon'}
 
 
-@app.get('/api/contacts/')
+@app.get('/api/contacts')
 async def contact_info():
     contact_details = [
         {'name': 'LinkedIn', 'url': config('LINKEDIN_URL')},
@@ -70,7 +70,7 @@ async def contact_info():
     return contact_details
 
 
-@app.get("/api/posts/")
+@app.get("/api/posts")
 async def list_posts():
     db_session = SessionLocal()
     posts = db_session.query(BlogPost).all()
@@ -78,7 +78,7 @@ async def list_posts():
     return posts
 
 
-@app.post("/api/post/")
+@app.post("/api/post")
 async def create_post(title: str, body: str):
     db_session = SessionLocal()
     if db_session.query(BlogPost).filter_by(title=title).first():
@@ -103,7 +103,7 @@ async def create_post(title: str, body: str):
     }
 
 
-@app.delete("/api/post/{post_id}/")
+@app.delete("/api/post/{post_id}")
 async def delete_post(post_id: int):
     db_session = SessionLocal()
     blog_post = db_session.query(BlogPost).filter(BlogPost.id == post_id).first()
@@ -118,7 +118,7 @@ async def delete_post(post_id: int):
     return {'message': f"Post with id {post_id} has been deleted"}
 
 
-@app.put("/api/post/{post_id}/")
+@app.put("/api/post/{post_id}")
 async def update_post(post_id: int, title: Optional[str] = None, body: Optional[str] = None):
     db_session = SessionLocal()
     blog_post = db_session.query(BlogPost).filter(BlogPost.id == post_id).first()
@@ -146,7 +146,7 @@ async def update_post(post_id: int, title: Optional[str] = None, body: Optional[
     }
 
 
-@app.get("/api/post/{post_id}/")
+@app.get("/api/post/{post_id}")
 async def read_post(post_id: int):
     with SessionLocal() as session:
         post = session.query(BlogPost).get(post_id)
