@@ -23,9 +23,7 @@ app = FastAPI(
 )
 
 # Add CORS middleware settings
-origins = [
-    config('URL')
-]
+origins = config('URL').split(',')
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,11 +58,23 @@ async def home():
     return {'title': 'Nature Blog', 'content': 'This is the blog of Vernon'}
 
 
-@app.get("/api/posts")
+@app.get('/api/contacts/')
+async def contact_info():
+    contact_details = [
+        {'name': 'LinkedIn', 'url': config('LINKEDIN_URL')},
+        {'name': 'Twitter', 'url': config('TWITTER_URL')},
+        {'name': 'Github', 'url': config('GITHUB_URL')}
+    ]
+    for key, url_detail in enumerate(contact_details):
+        url_detail['key'] = key
+    return contact_details
+
+
+@app.get("/api/posts/")
 async def list_posts():
-    session = SessionLocal()
-    posts = session.query(BlogPost).all()
-    session.close()
+    db_session = SessionLocal()
+    posts = db_session.query(BlogPost).all()
+    db_session.close()
     return posts
 
 
@@ -76,7 +86,7 @@ async def create_post(title: str, body: str):
 
     slug = generate_unique_slug(title, db_session)
 
-    blog_post = BlogPost(title=title, slug=slug, body=body)
+    blog_post = BlogPost(title=title.title(), slug=slug, body=body)
 
     db_session.add(blog_post)
     db_session.commit()
