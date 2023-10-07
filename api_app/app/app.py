@@ -146,10 +146,12 @@ async def update_post(post_id: int, title: Optional[str] = None, body: Optional[
     }
 
 
-@app.get("/api/post/{post_id}")
-async def read_post(post_id: int):
-    with SessionLocal() as session:
-        post = session.query(BlogPost).get(post_id)
-        if not post:
-            raise HTTPException(status_code=404, detail="Post not found")
-        return {"id": post.id, "title": post.title, "body": post.body}
+@app.get("/api/post/{post_slug}")
+async def read_post(post_slug: str):
+    db_session = SessionLocal()
+    post = db_session.query(BlogPost).filter(BlogPost.slug == post_slug).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    return post
