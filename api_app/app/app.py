@@ -1,12 +1,14 @@
 """Backend API for nature block website"""
 
 from typing import Optional
+
 from decouple import config
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from slugify import slugify
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import sessionmaker
 
+from helpers import generate_unique_slug
 from model import init_db, BlogPost, engine
 
 app = FastAPI(
@@ -36,18 +38,6 @@ app.add_middleware(
 SessionLocal = sessionmaker(bind=engine)
 
 
-def generate_unique_slug(title: str, session) -> str:
-    base_slug = slugify(title)
-    slug = base_slug
-    counter = 1
-
-    while session.query(BlogPost).filter_by(slug=slug).first():
-        slug = f"{base_slug}-{counter}"
-        counter += 1
-
-    return slug
-
-
 @app.on_event("startup")
 async def startup_event():
     init_db()
@@ -55,7 +45,14 @@ async def startup_event():
 
 @app.get('/')
 async def home():
-    return {'title': 'Nature Blog', 'content': 'This is the blog of Vernon'}
+    return {'title': 'Nature Blog', 'content': 'The server is running'}
+
+
+@app.get("/set-header/")
+def set_header():
+    content = {"message": "Header set"}
+    headers = {"Custom-Header": "Some value"}
+    return JSONResponse(content=content, headers=headers)
 
 
 @app.get('/api/contacts')
@@ -84,7 +81,7 @@ async def create_post(title: str, body: str):
     if db_session.query(BlogPost).filter_by(title=title).first():
         return {"error": "A post with this title already exists."}
 
-    slug = generate_unique_slug(title, db_session)
+    slug = generate_unique_slug(title, db_session, BlogPost)
 
     blog_post = BlogPost(title=title.title(), slug=slug, body=body)
 
@@ -128,7 +125,7 @@ async def update_post(post_id: int, title: Optional[str] = None, body: Optional[
 
     if title:
         blog_post.title = title
-        blog_post.slug = generate_unique_slug(title, db_session)
+        blog_post.slug = generate_unique_slug(title, db_session, BlogPost)
     if body:
         blog_post.body = body
 
@@ -155,3 +152,8 @@ async def read_post(post_slug: str):
         raise HTTPException(status_code=404, detail="Post not found")
 
     return post
+
+
+@app.get("/api/login")
+async def login(username: str, password: str):
+    return {'username': username, 'password': password}
